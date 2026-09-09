@@ -1,69 +1,224 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function Home() {
+import { BackendUnavailable } from '@/components/backend-unavailable'
+import { GraphCanvas } from '@/components/graph/graph-canvas'
+import { degreesOf } from '@/components/graph/layout'
+import { topicColour } from '@/components/graph/topic-colour'
+import { SearchBox } from '@/components/search/search-box'
+import { api } from '@/lib/api'
+import type { ArticleReference, GraphNeighbourhood, TaxonomyListing } from '@/lib/types'
+
+/**
+ * The landing page.
+ *
+ * The graph is the product, so the graph is the centrepiece — a first-time visitor should be able
+ * to see what this place is without reading a paragraph about it. Search sits directly under the
+ * title because it is the fastest route in, and the three columns below carry real content rather
+ * than being signposts: everything on this page is one click from something to read.
+ *
+ * Three concurrent requests, all cached backend-side. "Most connected" is derived from the graph
+ * response already in hand rather than being a fourth call — the answer is in the edges.
+ */
+export default async function HomePage() {
+  let articles: ArticleReference[] = []
+  let topics: TaxonomyListing = { entries: [] }
+  let graph: GraphNeighbourhood | null = null
+  let unavailable = false
+
+  try {
+    const [archive, taxonomy, overview] = await Promise.all([
+      api.articles(0, 6),
+      api.topics(),
+      api.graphOverview(40),
+    ])
+    articles = archive.content
+    topics = taxonomy
+    graph = overview
+  } catch {
+    unavailable = true
+  }
+
+  const mostConnected = graph ? rankByConnections(graph) : []
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <section className="mx-auto max-w-2xl text-center">
+        <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+          Knowledge, connected
+        </h1>
+        <p className="mt-3 text-lg text-muted-foreground text-balance">
+          Durable technical writing, linked to the ideas around it. Ask a question, or follow the
+          links.
+        </p>
+        <div className="mx-auto mt-7 max-w-xl">
+          <Suspense fallback={<div className="h-12 rounded-full border border-border" />}>
+            <SearchBox size="hero" />
+          </Suspense>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {unavailable ? (
+        <div className="mt-12">
+          <BackendUnavailable what="The knowledge base" />
         </div>
-      </main>
+      ) : (
+        <>
+          {graph && graph.nodes.length > 0 ? (
+            <section aria-labelledby="graph-heading" className="mt-10">
+              <GraphCanvas
+                neighbourhood={graph}
+                height={440}
+                layout="force"
+                showControls={false}
+              />
+              <div className="mt-3 text-center">
+                <h2 id="graph-heading" className="sr-only">
+                  The knowledge graph
+                </h2>
+                <Link
+                  href="/graph"
+                  className="text-sm font-medium underline-offset-4 hover:underline"
+                >
+                  Explore the graph →
+                </Link>
+              </div>
+            </section>
+          ) : null}
+
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Panel
+              title="Latest"
+              hint="New articles and updates"
+              moreHref="/articles"
+              moreLabel="All articles"
+              emptyMessage="Nothing published yet. Connect a repository in the studio."
+            >
+              {articles.map((article) => (
+                <li key={article.slug}>
+                  <Link
+                    href={`/articles/${article.slug}`}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {article.title}
+                  </Link>
+                  {article.authorName ? (
+                    <p className="text-xs text-muted-foreground">{article.authorName}</p>
+                  ) : null}
+                </li>
+              ))}
+            </Panel>
+
+            <Panel
+              title="Most connected"
+              hint="The articles others link to most"
+              moreHref="/graph"
+              moreLabel="Open the graph"
+              emptyMessage="No links between articles yet."
+            >
+              {mostConnected.map((entry) => (
+                <li key={entry.slug} className="flex items-baseline gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="mt-1.5 inline-block size-2.5 shrink-0 rounded-full"
+                    style={{ background: topicColour(entry.topic).dot }}
+                  />
+                  <span>
+                    <Link
+                      href={`/graph?slug=${encodeURIComponent(entry.slug)}`}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {entry.title}
+                    </Link>
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      {entry.connections} connection{entry.connections === 1 ? '' : 's'}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </Panel>
+
+            <Panel
+              title="Topics"
+              hint="Browse by subject"
+              moreHref="/topics"
+              moreLabel="All topics"
+              emptyMessage="No topics yet."
+            >
+              {topics.entries.slice(0, 6).map((topic) => (
+                <li key={topic.slug} className="flex items-baseline justify-between gap-3">
+                  <Link
+                    href={`/topics/${topic.slug}`}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {topic.name}
+                  </Link>
+                  {/* The count is shown so nobody clicks into an almost-empty topic to find out. */}
+                  <span className="text-xs text-muted-foreground">{topic.articleCount}</span>
+                </li>
+              ))}
+            </Panel>
+          </div>
+        </>
+      )}
     </div>
-  );
+  )
+}
+
+function Panel({
+  title,
+  hint,
+  moreHref,
+  moreLabel,
+  emptyMessage,
+  children,
+}: {
+  title: string
+  hint: string
+  moreHref: string
+  moreLabel: string
+  emptyMessage: string
+  children: React.ReactNode
+}) {
+  const items = Array.isArray(children) ? children : [children]
+  const empty = items.flat().filter(Boolean).length === 0
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-5">
+      <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+      {empty ? (
+        <p className="mt-4 text-sm text-muted-foreground">{emptyMessage}</p>
+      ) : (
+        <ul className="mt-4 space-y-2.5 text-sm">{children}</ul>
+      )}
+      <Link
+        href={moreHref}
+        className="mt-4 inline-block text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+      >
+        {moreLabel} →
+      </Link>
+    </section>
+  )
+}
+
+/**
+ * The hubs of the graph, by how many other articles connect to them.
+ *
+ * This is the honest version of "trending": the platform does not track views, so ranking by
+ * popularity would mean inventing a number. Connection count is a real property of the corpus and
+ * is what the graph is about anyway.
+ */
+function rankByConnections(graph: GraphNeighbourhood) {
+  const degrees = degreesOf(graph.nodes, graph.edges)
+  return graph.nodes
+    .map((node) => ({
+      slug: node.slug,
+      title: node.title,
+      topic: node.topic,
+      connections: degrees.get(node.id) ?? 0,
+    }))
+    .filter((entry) => entry.connections > 0)
+    .sort((a, b) => b.connections - a.connections || a.title.localeCompare(b.title))
+    .slice(0, 6)
 }
