@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { ContentBlocks } from '@/components/content/content-blocks'
 import { ArticleGraph } from '@/components/graph/article-graph'
+import { ArticleViewBeacon } from '@/components/article-view-beacon'
 import { ApiRequestError, api } from '@/lib/api'
 import type { ArticleReadModel, ArticleReference } from '@/lib/types'
 
@@ -58,6 +59,7 @@ export default async function ArticlePage(props: PageProps<'/articles/[slug]'>) 
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <ArticleViewBeacon slug={article.slug} />
       <Breadcrumbs entries={article.breadcrumbs} />
 
       <div className="mt-6 gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem]">

@@ -11,6 +11,7 @@ import type {
   PageResponse,
   SearchResponse,
   SearchSuggestion,
+  TrendingArticle,
   SourceResponse,
   TagReadModel,
   TaxonomyListing,
@@ -189,6 +190,16 @@ export const api = {
 
   search: (q: string, page = 0, size = 20, understand?: boolean) =>
     request<SearchResponse>('/api/search', { query: { q, page, size, understand } }),
+
+  /** The most-read articles over a window. Empty until something has actually been read. */
+  trending: (days = 7, limit = 6) =>
+    request<TrendingArticle[]>('/api/articles/trending', { query: { days, limit } }),
+
+  /**
+   * Records one read. Fire-and-forget: a miscounted view is never worth delaying or failing a page.
+   */
+  recordArticleView: (slug: string) =>
+    request<void>(`/api/articles/${encodeURIComponent(slug)}/view`, { init: { method: 'POST' } }),
 
   /** Prefix matches for the search box's typeahead. Not a shortened search — see the endpoint. */
   searchSuggest: (q: string, limit = 6) =>

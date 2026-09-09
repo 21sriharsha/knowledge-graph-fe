@@ -3,11 +3,15 @@ import { Suspense } from 'react'
 
 import { BackendUnavailable } from '@/components/backend-unavailable'
 import { GraphCanvas } from '@/components/graph/graph-canvas'
-import { degreesOf } from '@/components/graph/layout'
 import { topicColour } from '@/components/graph/topic-colour'
 import { SearchBox } from '@/components/search/search-box'
 import { api } from '@/lib/api'
-import type { ArticleReference, GraphNeighbourhood, TaxonomyListing } from '@/lib/types'
+import type {
+  ArticleReference,
+  GraphNeighbourhood,
+  TaxonomyListing,
+  TrendingArticle,
+} from '@/lib/types'
 
 /**
  * The landing page.
@@ -17,29 +21,29 @@ import type { ArticleReference, GraphNeighbourhood, TaxonomyListing } from '@/li
  * title because it is the fastest route in, and the three columns below carry real content rather
  * than being signposts: everything on this page is one click from something to read.
  *
- * Three concurrent requests, all cached backend-side. "Most connected" is derived from the graph
- * response already in hand rather than being a fourth call — the answer is in the edges.
+ * Four concurrent requests, all cached backend-side.
  */
 export default async function HomePage() {
   let articles: ArticleReference[] = []
   let topics: TaxonomyListing = { entries: [] }
   let graph: GraphNeighbourhood | null = null
+  let trending: TrendingArticle[] = []
   let unavailable = false
 
   try {
-    const [archive, taxonomy, overview] = await Promise.all([
+    const [archive, taxonomy, overview, mostRead] = await Promise.all([
       api.articles(0, 6),
       api.topics(),
       api.graphOverview(40),
+      api.trending(7, 6),
     ])
     articles = archive.content
     topics = taxonomy
     graph = overview
+    trending = mostRead
   } catch {
     unavailable = true
   }
-
-  const mostConnected = graph ? rankByConnections(graph) : []
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -110,13 +114,13 @@ export default async function HomePage() {
             </Panel>
 
             <Panel
-              title="Most connected"
-              hint="The articles others link to most"
-              moreHref="/graph"
-              moreLabel="Open the graph"
-              emptyMessage="No links between articles yet."
+              title="Trending"
+              hint="Most read this week"
+              moreHref="/articles"
+              moreLabel="All articles"
+              emptyMessage="Nothing has been read yet this week. This fills in as people visit."
             >
-              {mostConnected.map((entry) => (
+              {trending.map((entry) => (
                 <li key={entry.slug} className="flex items-baseline gap-2">
                   <span
                     aria-hidden="true"
@@ -125,13 +129,15 @@ export default async function HomePage() {
                   />
                   <span>
                     <Link
-                      href={`/graph?slug=${encodeURIComponent(entry.slug)}`}
+                      href={`/articles/${entry.slug}`}
                       className="underline-offset-4 hover:underline"
                     >
                       {entry.title}
                     </Link>
+                    {/* The count is shown rather than an unexplained order: a ranked list that
+                        will not say what ranked it asks to be taken on faith. */}
                     <span className="ml-1.5 text-xs text-muted-foreground">
-                      {entry.connections} connection{entry.connections === 1 ? '' : 's'}
+                      {entry.views} read{entry.views === 1 ? '' : 's'}
                     </span>
                   </span>
                 </li>
@@ -200,25 +206,4 @@ function Panel({
       </Link>
     </section>
   )
-}
-
-/**
- * The hubs of the graph, by how many other articles connect to them.
- *
- * This is the honest version of "trending": the platform does not track views, so ranking by
- * popularity would mean inventing a number. Connection count is a real property of the corpus and
- * is what the graph is about anyway.
- */
-function rankByConnections(graph: GraphNeighbourhood) {
-  const degrees = degreesOf(graph.nodes, graph.edges)
-  return graph.nodes
-    .map((node) => ({
-      slug: node.slug,
-      title: node.title,
-      topic: node.topic,
-      connections: degrees.get(node.id) ?? 0,
-    }))
-    .filter((entry) => entry.connections > 0)
-    .sort((a, b) => b.connections - a.connections || a.title.localeCompare(b.title))
-    .slice(0, 6)
 }
