@@ -30,7 +30,28 @@ import type {
  * nobody (FRONTEND-SPEC §11).
  */
 
-const BASE_URL = process.env.KNOWLEDGE_API_URL ?? 'http://localhost:8080'
+/**
+ * Where the backend lives.
+ *
+ * Falls back to localhost only in development. In a built deployment the frontend and the backend
+ * are separate services on separate hosts, and a missing variable there is a misconfiguration, not
+ * a default worth guessing at: every page would render "backend unavailable" and point at a backend
+ * problem that does not exist. Failing on the first request names the actual fault instead.
+ */
+const BASE_URL =
+  process.env.KNOWLEDGE_API_URL ??
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8080')
+
+/**
+ * How long to wait for the backend before giving up.
+ *
+ * Every public page is server-rendered, so an unanswered backend request is a page render that
+ * never finishes and a browser connection held open until something further up the stack times out.
+ * Over localhost that is invisible; between two independently deployed services it is not. A bounded
+ * wait turns a hung backend into the "backend unavailable" state the pages already know how to
+ * render.
+ */
+const REQUEST_TIMEOUT_MS = Number(process.env.KNOWLEDGE_API_TIMEOUT_MS ?? 8000)
 
 /** Thrown for any non-2xx response, carrying the status so callers can map 404 to `notFound()`. */
 export class ApiRequestError extends Error {
@@ -52,6 +73,14 @@ export class ApiRequestError extends Error {
 type QueryValue = string | number | boolean | undefined | null
 
 function buildUrl(path: string, query?: Record<string, QueryValue>): string {
+  if (!BASE_URL) {
+    throw new ApiRequestError(
+      500,
+      path,
+      'API_URL_MISSING',
+      'KNOWLEDGE_API_URL must be set: the frontend does not know where the backend is.',
+    )
+  }
   const url = new URL(path, BASE_URL)
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null && value !== '') {
@@ -75,11 +104,25 @@ async function request<T>(
 
   let response: Response
   try {
-    response = await fetch(url, { ...options.init, headers })
+    response = await fetch(url, {
+      ...options.init,
+      headers,
+      // A caller's own signal wins, so a cancelled request is not resurrected by this deadline.
+      signal: options.init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
   } catch (cause) {
-    // The backend being unreachable is a distinct condition from it saying no. Pages render a
-    // "backend unavailable" state for this rather than a misleading empty result.
-    throw new ApiRequestError(503, path, 'BACKEND_UNREACHABLE', `Cannot reach the API at ${BASE_URL}`)
+    // Unreachable and too-slow are the same thing from a reader's point of view — the page cannot
+    // be built — and distinct from the backend saying no. Pages render a "backend unavailable"
+    // state for this rather than a misleading empty result.
+    const timedOut = cause instanceof DOMException && cause.name === 'TimeoutError'
+    throw new ApiRequestError(
+      503,
+      path,
+      'BACKEND_UNREACHABLE',
+      timedOut
+        ? `The API at ${BASE_URL} did not respond within ${REQUEST_TIMEOUT_MS}ms`
+        : `Cannot reach the API at ${BASE_URL}`,
+    )
   }
 
   if (!response.ok) {
