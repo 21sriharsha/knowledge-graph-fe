@@ -58,6 +58,16 @@ const BASE_URL =
  */
 const REQUEST_TIMEOUT_MS = Number(process.env.KNOWLEDGE_API_TIMEOUT_MS ?? 8000)
 
+/**
+ * The backend URL for a path, for the few callers that need the raw response rather than JSON.
+ *
+ * <p>Exported narrowly on purpose. Everything else goes through `request`, which parses, validates
+ * and maps errors; this exists for binary passthrough, where parsing is exactly the wrong thing.
+ */
+export function backendUrlFor(path: string): string {
+  return buildUrl(path)
+}
+
 /** Thrown for any non-2xx response, carrying the status so callers can map 404 to `notFound()`. */
 export class ApiRequestError extends Error {
   constructor(
