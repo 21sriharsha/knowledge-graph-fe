@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { MermaidDiagram } from '@/components/content/mermaid-diagram'
 import type { ContentBlock, InlineContent, ListItem, TableRow } from '@/lib/types'
 
 /**
@@ -37,6 +38,12 @@ function Block({ block }: { block: ContentBlock }) {
       )
 
     case 'code':
+      // A diagram language is drawn rather than printed. Deciding that is a rendering concern, so
+      // it lives here: the backend returns a code block with its language and no opinion about
+      // what a reader should see.
+      if (isDiagramLanguage(block.language)) {
+        return <MermaidDiagram code={block.code} />
+      }
       return (
         <figure className="my-6">
           {block.language ? (
@@ -299,4 +306,17 @@ function InternalLink({ node }: { node: Extract<InlineContent, { type: 'internal
       <span className="sr-only"> (article not written yet)</span>
     </span>
   )
+}
+
+/**
+ * Whether a fence's language means "draw this".
+ *
+ * A small closed set rather than anything Mermaid might accept, so adding a renderer is a decision
+ * someone makes here rather than a side effect of an author picking a word. `mmd` is the
+ * conventional file extension and turns up in fences often enough to be worth honouring.
+ */
+function isDiagramLanguage(language: string | null | undefined): boolean {
+  if (!language) return false
+  const normalised = language.trim().toLowerCase()
+  return normalised === 'mermaid' || normalised === 'mmd'
 }
