@@ -23,6 +23,7 @@ export default async function StudioPage() {
   let sources: SourceResponse[] = []
   let runs: IngestionRunResponse[] = []
   let error: string | null = null
+  let errorId: string | null = null
 
   // Asked first and separately, because it is the one call a brand-new account can make. Without
   // it, someone who has just signed up sees an empty studio and no reason for it.
@@ -30,6 +31,7 @@ export default async function StudioPage() {
     account = await api.studio.me()
   } catch (caught) {
     error = studioError(caught)
+    errorId = caught instanceof ApiRequestError ? (caught.requestId ?? null) : null
   }
 
   const canOperate = (account?.roles.length ?? 0) > 0
@@ -40,6 +42,7 @@ export default async function StudioPage() {
       ;[sources, runs] = await Promise.all([api.studio.sources(), api.studio.ingestions(10)])
     } catch (caught) {
       error = studioError(caught)
+      errorId = caught instanceof ApiRequestError ? (caught.requestId ?? null) : null
     }
   }
 
@@ -79,7 +82,15 @@ export default async function StudioPage() {
 
       {error ? (
         <div role="alert" className="mt-6 rounded-md border border-border bg-muted/50 p-6 text-sm">
-          {error}
+          <p>{error}</p>
+          {errorId ? (
+            // Shown so a report can be acted on. Pages render on the server, so without this the
+            // best anyone can send is a screenshot and a rough time.
+            <p className="mt-3 text-xs text-muted-foreground">
+              Reference <code className="font-mono">{errorId}</code> — quote this and the failure
+              can be found in the logs directly.
+            </p>
+          ) : null}
         </div>
       ) : (
         <>

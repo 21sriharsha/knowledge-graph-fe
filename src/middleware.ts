@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { REQUEST_ID_HEADER } from '@/lib/request-id'
+
 /**
  * Gates the studio and keeps sessions alive.
  *
@@ -16,7 +18,15 @@ import { NextResponse, type NextRequest } from 'next/server'
  * studio request; a middleware bug must not become an authorization bypass.
  */
 export async function middleware(request: NextRequest) {
+  // One id for the whole request, minted before anything can fail. Server Components read it from
+  // the incoming headers, so the browser request, the render, and every backend call it makes all
+  // carry the same identifier -- which is the only way a page that failed on the server can be
+  // found in a log afterwards.
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID()
+  request.headers.set(REQUEST_ID_HEADER, requestId)
+
   let response = NextResponse.next({ request })
+  response.headers.set(REQUEST_ID_HEADER, requestId)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,6 +41,8 @@ export async function middleware(request: NextRequest) {
             request.cookies.set(name, value)
           }
           response = NextResponse.next({ request })
+          // Re-applied: rebuilding the response above discards headers set on the previous one.
+          response.headers.set(REQUEST_ID_HEADER, requestId)
           for (const { name, value, options } of cookiesToSet) {
             response.cookies.set(name, value, options)
           }

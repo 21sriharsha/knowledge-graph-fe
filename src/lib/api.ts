@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { REQUEST_ID_HEADER, currentRequestId } from './request-id'
 import { currentAccessToken } from './supabase/server'
 
 import type {
@@ -64,6 +65,8 @@ export class ApiRequestError extends Error {
     readonly path: string,
     readonly code?: string,
     message?: string,
+    /** The id the backend logged this failure against, so a reported error is one grep away. */
+    readonly requestId?: string | null,
   ) {
     super(message ?? `${status} from ${path}`)
     this.name = 'ApiRequestError'
@@ -102,10 +105,16 @@ async function request<T>(
   const headers = new Headers(options.init?.headers)
   headers.set('Accept', 'application/json')
 
+  const requestId = await currentRequestId()
+  if (requestId) {
+    headers.set(REQUEST_ID_HEADER, requestId)
+  }
+
   if (options.auth) {
     headers.set('Authorization', await studioAuthorizationHeader())
   }
 
+  const startedAt = Date.now()
   let response: Response
   try {
     response = await fetch(url, {
@@ -119,6 +128,13 @@ async function request<T>(
     // be built — and distinct from the backend saying no. Pages render a "backend unavailable"
     // state for this rather than a misleading empty result.
     const timedOut = cause instanceof DOMException && cause.name === 'TimeoutError'
+    logCall({
+      requestId,
+      method: options.init?.method ?? 'GET',
+      path,
+      status: timedOut ? 'timeout' : 'unreachable',
+      durationMs: Date.now() - startedAt,
+    })
     throw new ApiRequestError(
       503,
       path,
@@ -128,6 +144,14 @@ async function request<T>(
         : `Cannot reach the API at ${BASE_URL}`,
     )
   }
+
+  logCall({
+    requestId,
+    method: options.init?.method ?? 'GET',
+    path,
+    status: response.status,
+    durationMs: Date.now() - startedAt,
+  })
 
   if (!response.ok) {
     let code: string | undefined
@@ -139,13 +163,40 @@ async function request<T>(
     } catch {
       // A non-JSON error body (a proxy's HTML page, say) is not itself an error worth surfacing.
     }
-    throw new ApiRequestError(response.status, path, code, message)
+    // Prefer the id the backend echoed: if the two ever disagree, the backend's is the one written
+    // into its logs, and that is the one worth quoting.
+    throw new ApiRequestError(
+        response.status, path, code, message,
+        response.headers.get(REQUEST_ID_HEADER) ?? requestId)
   }
 
   if (response.status === 204) {
     return undefined as T
   }
   return (await response.json()) as T
+}
+
+/**
+ * Records that a backend call happened.
+ *
+ * Nothing did, before this. Every call is server to server, so a failing page produced no entry in
+ * the browser's network tab and no line anywhere on the frontend either -- the render simply came
+ * back wrong. Finding out which call had failed meant reading backend logs and matching timestamps.
+ *
+ * One line per call, as JSON, carrying the id the backend logs against the same request. Failures
+ * are logged at error level; everything else is quiet enough to leave on.
+ */
+function logCall(call: {
+  requestId: string | null
+  method: string
+  path: string
+  status: number | string
+  durationMs: number
+}) {
+  const failed = typeof call.status !== 'number' || call.status >= 400
+  const line = JSON.stringify({ event: 'backend_call', ...call })
+  if (failed) console.error(line)
+  else if (process.env.KNOWLEDGE_LOG_CALLS === 'true') console.log(line)
 }
 
 /**
