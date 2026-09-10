@@ -213,16 +213,30 @@ export function formatWhen(iso: string): string {
   })
 }
 
+/**
+ * Turns a failed studio call into something the reader can act on.
+ *
+ * <p>Every branch here answers "what do I do now", which is the only reason to show an error at all.
+ * These messages talked about configured credentials until sign-in existed; saying that to someone
+ * who has just signed in successfully sends them looking for an environment variable when the real
+ * answer is that nobody has given their account a role yet.
+ */
 function studioError(error: unknown): string {
   if (error instanceof ApiRequestError) {
-    if (error.code === 'STUDIO_CREDENTIALS_MISSING') {
-      return 'Studio credentials are not configured. Set KNOWLEDGE_STUDIO_USERNAME and KNOWLEDGE_STUDIO_PASSWORD in the environment.'
+    if (error.code === 'NOT_SIGNED_IN') {
+      return 'Your session has expired. Sign in again to continue.'
     }
-    if (error.status === 401 || error.status === 403) {
-      return 'The configured studio credentials were rejected by the backend.'
+    if (error.status === 401) {
+      return 'The backend did not accept your session. Signing out and back in usually fixes it; if it does not, the identity provider and the backend disagree about who issues tokens.'
+    }
+    if (error.status === 403) {
+      return 'You are signed in, but this account is not allowed to do that. An administrator controls which accounts can operate the studio.'
     }
     if (error.code === 'BACKEND_UNREACHABLE') {
       return 'The knowledge service is not responding, so the studio cannot load.'
+    }
+    if (error.status >= 500) {
+      return 'The backend failed while loading the studio. This is a fault on our side, not something you did wrong.'
     }
   }
   return 'The studio could not be loaded.'
