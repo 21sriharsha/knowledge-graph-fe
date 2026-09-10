@@ -3,6 +3,7 @@ import 'server-only'
 import { currentAccessToken } from './supabase/server'
 
 import type {
+  AccountModel,
   ArticleReadModel,
   ArticleReference,
   ArticleResponse,
@@ -242,6 +243,10 @@ export const api = {
   // -------------------------------------------------------------------------
 
   studio: {
+    /** The caller's own account. Reachable even with no roles, which is how a new sign-in is
+     *  told why the studio is empty rather than being shown an empty studio. */
+    me: () => request<AccountModel>('/api/studio/me', { auth: true }),
+
     sources: () => request<SourceResponse[]>('/api/studio/sources', { auth: true }),
 
     source: (id: string) =>

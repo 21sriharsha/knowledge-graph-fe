@@ -294,6 +294,23 @@ export interface SearchSuggestionsResponse {
 // Studio
 // ---------------------------------------------------------------------------
 
+export type PlatformRole = 'AUTHOR' | 'ADMIN'
+
+/**
+ * The signed-in account.
+ *
+ * `authorId` is null until an administrator links the account to a byline, and `roles` is empty on
+ * a first sign-in. Both are normal states, and the studio has to render an explanation rather than
+ * an empty page when they occur.
+ */
+export interface AccountModel {
+  id?: string | null
+  email?: string | null
+  displayName?: string | null
+  roles: PlatformRole[]
+  authorId?: string | null
+}
+
 export type SourceType = 'GITHUB' | 'GITLAB' | 'AZURE_DEVOPS'
 
 export interface SourceResponse {
