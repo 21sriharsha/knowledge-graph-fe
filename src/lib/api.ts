@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { currentAccessToken } from './supabase/server'
+
 import type {
   ArticleReadModel,
   ArticleReference,
@@ -100,7 +102,7 @@ async function request<T>(
   headers.set('Accept', 'application/json')
 
   if (options.auth) {
-    headers.set('Authorization', studioAuthorizationHeader())
+    headers.set('Authorization', await studioAuthorizationHeader())
   }
 
   let response: Response
@@ -146,19 +148,36 @@ async function request<T>(
 }
 
 /**
- * Basic credentials for studio calls, read from the server environment.
+ * How a studio request proves who is making it.
  *
- * Missing credentials fail loudly here rather than producing a confusing 401 from the backend.
+ * **The signed-in person's own token**, forwarded to the backend, which validates it against the
+ * identity provider and decides authorization from its own records. That is the whole of what this
+ * application contributes: proof of who is asking.
+ *
+ * It replaces a shared operator credential held here and attached to every studio call. That
+ * arrangement kept the credential off the browser, which was the wrong thing to protect — the
+ * authority it carried was applied to whoever happened to be asking, so anyone who could reach
+ * `/studio` acted as the operator. Requests are now attributable to a person, and a person's
+ * permissions are decided per person.
+ *
+ * The static credentials remain as a deliberate fallback for non-human callers: a CI job or a
+ * migration script has no browser and cannot hold a session. They are used only when there is no
+ * signed-in user, so a person's request can never silently borrow them.
  */
-function studioAuthorizationHeader(): string {
+async function studioAuthorizationHeader(): Promise<string> {
+  const token = await currentAccessToken()
+  if (token) {
+    return `Bearer ${token}`
+  }
+
   const username = process.env.KNOWLEDGE_STUDIO_USERNAME
   const password = process.env.KNOWLEDGE_STUDIO_PASSWORD
   if (!username || !password) {
     throw new ApiRequestError(
-      500,
+      401,
       'studio',
-      'STUDIO_CREDENTIALS_MISSING',
-      'KNOWLEDGE_STUDIO_USERNAME and KNOWLEDGE_STUDIO_PASSWORD must be set to use studio features.',
+      'NOT_SIGNED_IN',
+      'Sign in to use studio features.',
     )
   }
   return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+import { AccountMenu } from '@/components/auth/account-menu'
 import { SearchBox } from '@/components/search/search-box'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import type { NavigationModel } from '@/lib/types'
@@ -55,12 +56,8 @@ export function SiteHeader({ navigation }: { navigation: NavigationModel | null 
 
         <ThemeToggle />
 
-        <Link
-          href="/studio"
-          className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-        >
-          Studio
-        </Link>
+        {/* Studio is only offered to someone who can actually open it. */}
+        <AccountMenu />
       </div>
     </header>
   )
