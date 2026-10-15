@@ -270,6 +270,20 @@ export interface SearchSuggestion {
   topic?: string | null
 }
 
+/**
+ * An article and how often it was read in the requested window.
+ *
+ * `views` is carried so the page can say *why* something is trending. A ranked list that will not
+ * show its working asks the reader to take it on faith.
+ */
+export interface TrendingArticle {
+  slug: string
+  title: string
+  authorName?: string | null
+  topic?: string | null
+  views: number
+}
+
 export interface SearchSuggestionsResponse {
   suggestions: SearchSuggestion[]
   /** The backend could not be reached. Typing and submitting still work. */
