@@ -26,7 +26,10 @@ All personas. Preferences are per browser (no account setting yet).
   the topic name (it is never the only cue).
 
 ### Reading mode
-- X02-FR-5 Available only in light theme, only on article pages. Switching to dark turns it off.
+- X02-FR-5 Available only in light theme, on every page (as in the prototype). Switching to dark turns
+  it off. The toggle sits in the site header immediately before the theme toggle, not in the article
+  body. The warm paper palette applies site-wide; the article-only effects in FR-6 (hidden chrome,
+  larger type, "Exit reading mode") apply on article pages only.
 - X02-FR-6 Reading mode: warm paper background, larger serif body, wider line height; hides header
   navigation, search, table of contents and local graph; shows an "Exit reading mode" control.
 - X02-FR-7 State persists per browser; leaving the article page keeps the preference but the chrome
@@ -69,6 +72,8 @@ All personas. Preferences are per browser (no account setting yet).
 - X02-AC-3 Given reading mode on, when the theme switches to dark, then reading mode turns off and its
   toggle is hidden.
 - X02-AC-4 Given reading mode on, when the reader opens the home page, then the header chrome is visible.
+- X02-AC-5 Given light theme on a non-article page (home, studio), then the reading toggle is in the header
+  before the theme toggle, and pressing it applies the paper palette; it is absent in dark theme.
 - X02-AC-5 Given a browser without Popover support, when a hover card opens, then the polyfill was
   loaded and the card is positioned; in a supporting browser the polyfill is never requested.
 - X02-AC-6 Given a destructive confirmation dialog, when it opens, then focus is on the safe action,

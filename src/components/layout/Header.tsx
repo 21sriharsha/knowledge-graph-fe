@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { serverEnv } from "@/lib/env/server";
 import { NavLinks } from "./NavLinks";
 import { ThemeToggle } from "./ThemeToggle";
+import { ReadingToggle } from "@/components/article/ReadingToggle";
 import { AccountSlot } from "./AccountSlot";
 import { HeaderSearch } from "@/components/search/HeaderSearch";
 import styles from "./Header.module.css";
@@ -25,6 +26,9 @@ export function Header() {
         <NavLinks explorer={env.FEATURE_EXPLORER} />
         {env.FEATURE_SEARCH ? <HeaderSearch /> : <span className={styles.spacer} />}
         <div className={styles.actions}>
+          {/* Next to the theme toggle, as in the prototype header (X02-FR-5); it renders only on article
+              pages in the light scheme. */}
+          <ReadingToggle />
           <ThemeToggle />
           <Suspense fallback={<span className={styles.accountPlaceholder} />}>
             <AccountSlot studioEnabled={env.FEATURE_STUDIO} />

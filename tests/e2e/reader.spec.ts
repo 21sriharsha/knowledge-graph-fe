@@ -26,7 +26,10 @@ test.describe("F02 home", () => {
     void consoleErrors;
   });
 
-  test("F02 feed lists articles with author links and has no serious a11y violations", async ({ page, consoleErrors }) => {
+  test("F02 feed lists articles with author links and has no serious a11y violations", async ({
+    page,
+    consoleErrors,
+  }) => {
     await page.goto("/");
     const cards = page.getByTestId("post-card");
     await expect(cards.first()).toBeVisible();
@@ -37,12 +40,16 @@ test.describe("F02 home", () => {
 });
 
 test.describe("F03 article reader", () => {
-  test("F03-AC-1 resolved links point to articles; unresolved render as dashed text", async ({ page, consoleErrors }) => {
+  test("F03-AC-1 resolved links point to articles; unresolved render as dashed text", async ({
+    page,
+    consoleErrors,
+  }) => {
     await page.goto(`/articles/${SAMPLE.article}`);
     await expect(page.getByTestId("article-title")).toHaveText(SAMPLE.articleTitle);
     const links = page.getByTestId("internal-link");
     expect(await links.count()).toBeGreaterThan(0);
-    for (const href of await links.evaluateAll((els) => els.map((e) => e.getAttribute("href")))) expect(href).toMatch(/^\/articles\/[a-z0-9-]+$/);
+    for (const href of await links.evaluateAll((els) => els.map((e) => e.getAttribute("href"))))
+      expect(href).toMatch(/^\/articles\/[a-z0-9-]+$/);
     await expect(page.getByTestId("unresolved-link").first()).toBeVisible();
     await expect(page.getByTestId("unresolved-link").first()).not.toHaveAttribute("href", /.*/);
     void consoleErrors;
@@ -111,6 +118,23 @@ test.describe("X02 theme and reading mode", () => {
     await page.getByTestId("reading-toggle").click();
     await page.goto("/");
     await expect(page.getByTestId("nav-read")).toBeVisible();
+    void consoleErrors;
+  });
+
+  test("X02-AC-5 the reading toggle is offered on non-article pages in light theme only", async ({
+    page,
+    consoleErrors,
+  }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    const toggle = page.getByTestId("app-header").getByTestId("reading-toggle");
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("html")).toHaveAttribute("data-reading", "on");
+    await expect(page.getByTestId("exit-reading")).toHaveCount(0); // the floating exit control is article-only
+    await page.getByTestId("theme-toggle").click(); // → dark
+    await expect(page.getByTestId("reading-toggle")).toHaveCount(0);
     void consoleErrors;
   });
 

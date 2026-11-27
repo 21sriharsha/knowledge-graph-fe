@@ -11,11 +11,11 @@ import { CopyButton } from "@/components/content/CopyButton";
 import { CopyCommands } from "@/components/content/CopyCommands";
 import { TableOfContents } from "@/components/article/TableOfContents";
 import { ViewTracker } from "@/components/article/ViewTracker";
-import { ReadingToggle } from "@/components/article/ReadingToggle";
 import { LocalGraphPanel } from "@/components/article/LocalGraphPanel";
 import { Avatar, TagChip, TopicChip } from "@/components/ui/Chips";
 import { ErrorState } from "@/components/ui/StateView";
 import { Icon } from "@/components/ui/Icon";
+import { ExitReading } from "@/components/article/ReadingToggle";
 import styles from "@/components/article/article.module.css";
 
 type Props = PageProps<"/articles/[slug]">;
@@ -124,7 +124,7 @@ async function Article({ params }: { params: Props["params"] }) {
                   <span className="sr-only">Open in graph</span>
                 </Link>
               )}
-              <ReadingToggle />
+              <ExitReading />
             </div>
           </div>
           {(a.topics?.length || a.tags?.length) && (

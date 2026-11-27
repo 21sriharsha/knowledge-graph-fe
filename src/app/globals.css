@@ -13,9 +13,10 @@
   accent-color: var(--accent);
 }
 
-/* Reading mode (X02-FR-5…7): light theme only, article pages only. The inline head script sets
-   data-reading only when the rendered scheme is light; :has() scopes it to article views. */
-:root[data-reading="on"]:has(main[data-view="article"]) {
+/* Reading mode (X02-FR-5…7), as in the prototype: light theme only. The warm paper palette applies on
+   every page; the larger reading type below (and the hidden chrome, in the header/article modules)
+   only on article views. The inline head script sets data-reading only when the scheme is light. */
+:root[data-reading="on"] {
   color-scheme: light;
   --bg: #f4efe5;
   --surface: #f4efe5;
@@ -28,6 +29,8 @@
   --code-bg: #ebe3d4;
   --accent: #7a4b17;
   --accent-soft: #efe4d1;
+}
+:root[data-reading="on"]:has(main[data-view="article"]) {
   --read-size: 22px;
   --read-lh: 1.8;
   --col: 640px;

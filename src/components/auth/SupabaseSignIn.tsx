@@ -10,6 +10,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { clientEnv } from "@/lib/env/client";
 import styles from "./auth.module.css";
+import { ProviderLogo } from "./ProviderLogo";
 
 const emailSchema = z.email().max(320);
 
@@ -43,10 +44,17 @@ export function SupabaseSignIn({ next }: { next: string }) {
       return;
     }
     setEmailError(null);
-    const { error } = await client().auth.signInWithOtp({ email: parsed.data, options: { emailRedirectTo: callback() } });
+    const { error } = await client().auth.signInWithOtp({
+      email: parsed.data,
+      options: { emailRedirectTo: callback() },
+    });
     if (error) {
       setStatus("error");
-      setMessage(error.status === 429 ? "Too many attempts. Wait a minute and try again." : "We couldn't send the link. Please try again.");
+      setMessage(
+        error.status === 429
+          ? "Too many attempts. Wait a minute and try again."
+          : "We couldn't send the link. Please try again.",
+      );
     } else {
       setStatus("sent");
       setMessage("Check your inbox for a sign-in link.");
@@ -55,10 +63,24 @@ export function SupabaseSignIn({ next }: { next: string }) {
 
   return (
     <div className={styles.options}>
-      <button type="button" className="btn" onClick={() => oauth("github")} disabled={status === "redirecting"} data-testid="signin-github">
+      <button
+        type="button"
+        className="btn"
+        onClick={() => oauth("github")}
+        disabled={status === "redirecting"}
+        data-testid="signin-github"
+      >
+        <ProviderLogo provider="github" />
         Continue with GitHub
       </button>
-      <button type="button" className="btn" onClick={() => oauth("google")} disabled={status === "redirecting"} data-testid="signin-google">
+      <button
+        type="button"
+        className="btn"
+        onClick={() => oauth("google")}
+        disabled={status === "redirecting"}
+        data-testid="signin-google"
+      >
+        <ProviderLogo provider="google" />
         Continue with Google
       </button>
       <div className={styles.divider}>or</div>
@@ -85,7 +107,11 @@ export function SupabaseSignIn({ next }: { next: string }) {
           Email me a sign-in link
         </button>
       </form>
-      <p aria-live="polite" className={status === "error" ? styles.error : styles.status} data-testid={status === "sent" ? "magic-sent" : "oidc-progress"}>
+      <p
+        aria-live="polite"
+        className={status === "error" ? styles.error : styles.status}
+        data-testid={status === "sent" ? "magic-sent" : "oidc-progress"}
+      >
         {message}
       </p>
     </div>
