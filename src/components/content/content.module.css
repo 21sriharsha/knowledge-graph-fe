@@ -1,0 +1,288 @@
+/* Article prose: one quiet serif reading column (Medium). */
+.prose {
+  font-family: var(--serif);
+  font-size: var(--read-size);
+  line-height: var(--read-lh);
+  color: var(--fg);
+  overflow-wrap: break-word;
+}
+.prose > * {
+  margin-block: 0 1.05em;
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--sans);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-block: 1.8em 0.5em;
+  scroll-margin-top: calc(var(--hdr) + 16px);
+  text-wrap: balance;
+}
+.prose h2 {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+.prose h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+}
+.prose h4,
+.prose h5,
+.prose h6 {
+  font-size: 1em;
+  font-weight: 600;
+}
+.prose :is(h2, h3, h4):focus {
+  outline: none;
+}
+.prose ul,
+.prose ol {
+  padding-inline-start: 1.3em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--line-strong);
+  color: var(--muted);
+  font-style: italic;
+}
+.prose hr {
+  border: 0;
+  text-align: center;
+  margin-block: 2em;
+}
+.prose hr::after {
+  content: "· · ·";
+  letter-spacing: 0.6em;
+  color: var(--faint);
+}
+.inlineCode {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+}
+.internal {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.external {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.unresolved {
+  text-decoration: underline dashed var(--faint);
+  text-underline-offset: 4px;
+  cursor: help;
+}
+.image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 8px;
+}
+.tableWrap {
+  overflow-x: auto;
+  font-family: var(--sans);
+  font-size: 15px;
+}
+.tableWrap table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.tableWrap th,
+.tableWrap td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+/* Code: Shiki tokens carry --shiki-light / --shiki-dark; pick per scheme with a media fallback. */
+.code {
+  margin-inline: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--code-bg);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+.codeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 4px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
+}
+.codeLang {
+  font-size: 12px;
+  color: var(--faint);
+  text-transform: lowercase;
+}
+.code pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+.code code span {
+  color: var(--shiki-light);
+}
+@media (prefers-color-scheme: dark) {
+  .code code span {
+    color: var(--shiki-dark);
+  }
+}
+@supports (color: light-dark(white, black)) {
+  .code code span {
+    color: light-dark(var(--shiki-light), var(--shiki-dark));
+  }
+}
+.line {
+  display: inline;
+}
+
+.copy {
+  position: relative;
+  display: inline-flex;
+}
+.copyButton {
+  min-inline-size: 28px;
+  min-block-size: 28px;
+  width: auto;
+  height: auto;
+}
+.copyButton[data-copied] {
+  color: var(--ok);
+}
+.copyButton[data-failed] {
+  color: var(--err);
+}
+.copyTip {
+  position: absolute;
+  inset-inline-end: 100%;
+  inset-block-start: 50%;
+  translate: -6px -50%;
+  font-size: 12px;
+  font-family: var(--sans);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.copyTip:not(:empty) {
+  opacity: 1;
+}
+
+.diagram {
+  margin-inline: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--surface);
+  font-family: var(--sans);
+}
+.diagramSvg {
+  display: grid;
+  place-items: center;
+  overflow-x: auto;
+}
+.diagramSvg svg {
+  max-width: 100%;
+  height: auto;
+}
+.diagramPlaceholder {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  font-size: 13px;
+}
+.diagramSource {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.diagramSource pre {
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+/* Link hovercard (modern-web-guidance: hovercard). Hidden where anchor positioning is unsupported —
+   the preview is supplemental, and a viewport-centred card detached from its link would mislead. */
+.hovercard {
+  display: none;
+}
+@supports (position-area: block-end) {
+  .hovercard:is(:popover-open, :global(.\:popover-open)) {
+    display: grid;
+    gap: 4px;
+    inset: auto;
+    margin: 6px 0 0;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    width: min(320px, calc(100dvw - 32px));
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--raised);
+    color: var(--fg);
+    box-shadow: var(--shadow);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.4;
+    opacity: 1;
+    translate: 0 0;
+  }
+  @starting-style {
+    .hovercard:popover-open {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hovercard {
+    transition:
+      opacity 0.15s,
+      translate 0.15s,
+      display 0.15s,
+      overlay 0.15s;
+    transition-behavior: allow-discrete;
+  }
+}
+.internal[interestfor] {
+  interest-delay: 0.3s 0.15s;
+  --interest-delay-start: 0.3s;
+  --interest-delay-end: 0.15s;
+}
+.hcMeta {
+  font-size: 12px;
+  color: var(--faint);
+}
+.hcTitle {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+}
+.hcSummary {
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

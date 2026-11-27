@@ -1,0 +1,345 @@
+@import "./tokens.css";
+
+/* Typography and layout tokens (scheme-independent). Fonts come from next/font variables set on <html>. */
+:root {
+  --serif: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  --sans: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: var(--font-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --read-size: 20px;
+  --read-lh: 1.72;
+  --col: 680px;
+  --hdr: 56px;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  accent-color: var(--accent);
+}
+
+/* Reading mode (X02-FR-5…7): light theme only, article pages only. The inline head script sets
+   data-reading only when the rendered scheme is light; :has() scopes it to article views. */
+:root[data-reading="on"]:has(main[data-view="article"]) {
+  color-scheme: light;
+  --bg: #f4efe5;
+  --surface: #f4efe5;
+  --raised: #faf6ee;
+  --fg: #2b261f;
+  --muted: #5f574c;
+  --faint: #6f6659;
+  --line: #e2d9c9;
+  --line-strong: #d2c6b2;
+  --code-bg: #ebe3d4;
+  --accent: #7a4b17;
+  --accent-soft: #efe4d1;
+  --read-size: 22px;
+  --read-lh: 1.8;
+  --col: 640px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: inherit;
+}
+img,
+svg {
+  max-width: 100%;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+::selection {
+  background: var(--accent-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- shared primitives (used across features; components add CSS Modules on top) ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.wrap {
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 500;
+}
+.muted {
+  color: var(--muted);
+}
+.faint {
+  color: var(--faint);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+.serif {
+  font-family: var(--serif);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover {
+  border-color: var(--fg);
+}
+.btn[data-variant="primary"] {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+.btn[data-variant="danger"] {
+  color: var(--err);
+  border-color: color-mix(in srgb, var(--err) 40%, transparent);
+}
+.btn[data-variant="ghost"] {
+  border-color: transparent;
+  background: none;
+}
+.btn[data-variant="ghost"]:hover {
+  background: var(--code-bg);
+}
+.btn[data-size="sm"] {
+  min-height: 28px;
+  padding: 0 11px;
+  font-size: 13px;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--muted);
+  text-decoration: none;
+}
+.icon-btn:hover {
+  background: var(--code-bg);
+  color: var(--fg);
+}
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  font-size: 12.5px;
+  text-decoration: none;
+  color: var(--muted);
+  white-space: nowrap;
+  border: 0;
+}
+a.chip:hover {
+  color: var(--fg);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-block;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pill[data-tone="ok"] {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.pill[data-tone="warn"] {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.pill[data-tone="err"] {
+  background: var(--err-soft);
+  color: var(--err);
+}
+.pill[data-tone="info"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.pill[data-tone="neutral"] {
+  background: var(--code-bg);
+  color: var(--muted);
+}
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--code-bg) 0%,
+    color-mix(in srgb, var(--code-bg) 50%, var(--bg)) 50%,
+    var(--code-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: skel 1.2s infinite linear;
+  border-radius: 6px;
+}
+@keyframes skel {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 8px 11px;
+  font-size: 14px;
+  color: var(--fg);
+}
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.field [aria-invalid="true"] {
+  border-color: var(--err);
+}
+.field .hint {
+  font-size: 12px;
+  color: var(--faint);
+}
+.field .error {
+  font-size: 12px;
+  color: var(--err);
+}
+
+/* Popovers: keep closed popovers hidden until the polyfill loads (modern-web-guidance: dialog). */
+@supports not selector(:popover-open) {
+  [popover]:not(.\:popover-open) {
+    display: none;
+  }
+}
+
+/* <input type="checkbox" switch> fallback where native switches are unsupported (see lib/polyfills.ts). */
+.switch-fallback input[type="checkbox"][switch] {
+  appearance: none;
+  inline-size: 2.1em;
+  block-size: 1.2em;
+  border-radius: 999px;
+  background: var(--line-strong);
+  position: relative;
+  cursor: pointer;
+  margin: 0;
+  flex: none;
+  transition: background-color 0.15s;
+}
+.switch-fallback input[type="checkbox"][switch]::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0.15em;
+  inset-inline-start: 0.15em;
+  inline-size: 0.9em;
+  block-size: 0.9em;
+  border-radius: 50%;
+  background: #fff;
+  transition: translate 0.15s;
+}
+.switch-fallback input[type="checkbox"][switch]:checked {
+  background: var(--accent);
+}
+.switch-fallback input[type="checkbox"][switch]:checked::before {
+  translate: 0.9em 0;
+}
+@media (forced-colors: active) {
+  .switch-fallback input[type="checkbox"][switch] {
+    border: 1px solid CanvasText;
+  }
+}

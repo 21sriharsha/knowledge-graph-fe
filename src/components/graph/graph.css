@@ -1,0 +1,158 @@
+/* Graph styles (global because d3 creates the nodes; all selectors are namespaced with kg-). */
+svg.kg-graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+svg.kg-graph.static {
+  cursor: pointer;
+}
+svg.kg-graph:active {
+  cursor: grabbing;
+}
+.kg-graph line.e {
+  stroke: var(--edge);
+  stroke-width: 1.1;
+  transition:
+    stroke-opacity 0.15s,
+    stroke 0.15s;
+}
+.kg-graph line.e.sug {
+  stroke: var(--edge-sug);
+  stroke-dasharray: 3 4;
+}
+.kg-graph line.e.sug[data-kind="SEMANTIC_SIMILARITY"] {
+  stroke-dasharray: 1 3;
+}
+.kg-graph line.e.hi {
+  stroke: var(--accent);
+  stroke-opacity: 1;
+  stroke-width: 1.6;
+}
+.kg-graph line.e.dim {
+  stroke-opacity: 0.12;
+}
+.kg-graph g.n {
+  cursor: pointer;
+  outline: none;
+}
+.kg-graph g.n:focus-visible circle.halo {
+  opacity: 1;
+}
+.kg-graph g.n circle {
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  transition: opacity 0.15s;
+}
+.kg-graph g.n.focus circle.core {
+  stroke: var(--fg);
+  stroke-width: 2.2;
+}
+.kg-graph g.n circle.halo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0;
+}
+.kg-graph g.n.sel circle.halo {
+  opacity: 1;
+}
+.kg-graph g.n.match circle.halo {
+  opacity: 0.9;
+  stroke: var(--warn);
+}
+.kg-graph g.n text {
+  font-family: var(--sans);
+  font-size: 11px;
+  fill: var(--fg);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.kg-graph g.n.dim circle {
+  opacity: 0.18;
+}
+.kg-graph g.n.dim text,
+.kg-graph g.n.hov text {
+  opacity: 0 !important;
+}
+.kg-graph g.n.focus text,
+.kg-graph g.n.sel text {
+  opacity: 1 !important;
+  font-weight: 600;
+}
+.kg-arrow {
+  fill: var(--edge);
+}
+
+.kg-tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  max-width: 260px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--fg);
+  pointer-events: none;
+  opacity: 0;
+}
+.kg-tip.on {
+  opacity: 1;
+}
+/* Top-layer variant (popover="manual"): coordinates are viewport-relative and set by the engine.
+   Overrides the UA popover box (centred via inset:0 + margin:auto, Canvas colours, overflow:auto). */
+.kg-tip.kg-tip-layer {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  overflow: visible;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kg-tip {
+    transform: translateY(4px);
+    transition:
+      opacity 0.12s,
+      transform 0.12s;
+  }
+  .kg-tip.on {
+    transform: none;
+  }
+  /* A popover goes from display:none to shown, so the entry needs a starting style to animate.
+     Without @starting-style support it simply appears — acceptable for a hover card. */
+  @starting-style {
+    .kg-tip.on {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+}
+.kg-tip-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--faint);
+  font-size: 12px;
+}
+.kg-tip-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.kg-tip b {
+  display: block;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.25;
+  margin-top: 4px;
+  color: var(--fg);
+}

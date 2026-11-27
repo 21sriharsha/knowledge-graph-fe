@@ -1,0 +1,76 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.inner {
+  height: var(--hdr);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  flex: none;
+}
+.nav {
+  display: flex;
+  gap: 2px;
+}
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 14px;
+}
+.nav a:hover {
+  color: var(--fg);
+  background: var(--code-bg);
+}
+.nav a[aria-current="page"] {
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
+}
+.spacer {
+  flex: 1;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.accountPlaceholder {
+  display: inline-block;
+  width: 72px;
+  height: 34px;
+}
+
+/* Reading mode hides chrome on article pages only (X02-FR-6). */
+:global(:root[data-reading="on"]:has(main[data-view="article"])) .nav,
+:global(:root[data-reading="on"]:has(main[data-view="article"])) .inner :global(form[role="search"]) {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .brand span {
+    display: none;
+  }
+  .inner {
+    gap: 8px;
+  }
+}

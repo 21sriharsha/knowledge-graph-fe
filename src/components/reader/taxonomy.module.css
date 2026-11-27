@@ -1,0 +1,73 @@
+.page {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: 40px var(--gutter) 80px;
+}
+.header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(30px, 4vw, 40px);
+  line-height: 1.15;
+  margin: 6px 0 8px;
+}
+.description {
+  color: var(--muted);
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+.meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--faint);
+}
+.graphLink {
+  color: var(--accent);
+}
+.index {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.index a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.index a:hover {
+  background: var(--code-bg);
+}
+.index .name {
+  font-weight: 500;
+  flex: 1;
+}
+.index .desc {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 14px;
+}
+.authorHead {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}

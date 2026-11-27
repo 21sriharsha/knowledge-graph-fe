@@ -1,0 +1,60 @@
+.page {
+  display: grid;
+  place-items: start center;
+  padding: 64px var(--gutter);
+}
+.card {
+  width: min(420px, 100%);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  display: grid;
+  gap: 14px;
+}
+.card h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 30px;
+  margin: 0;
+}
+.options {
+  display: grid;
+  gap: 10px;
+}
+.divider {
+  text-align: center;
+  color: var(--faint);
+  font-size: 13px;
+}
+.magic {
+  display: grid;
+  gap: 10px;
+}
+.status {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  min-height: 1.4em;
+}
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--err);
+}
+.dev {
+  display: grid;
+  gap: 10px;
+}
+.dev form,
+.dev button {
+  width: 100%;
+}
+.devNote {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 13px;
+}

@@ -1,0 +1,154 @@
+.page {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: 32px var(--gutter) 80px;
+}
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.form input[type="search"] {
+  flex: 1 1 280px;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--surface);
+  font-size: 16px;
+}
+.ai {
+  flex-basis: 100%;
+  font-size: 14px;
+  color: var(--muted);
+}
+.meta {
+  font-size: 13px;
+  color: var(--faint);
+  margin: 4px 0 12px;
+}
+.notice {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+.noticeQuiet {
+  font-size: 13px;
+  color: var(--faint);
+}
+.interp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.interpLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.warn {
+  color: var(--warn);
+}
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hit {
+  padding-block: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.hitTitle {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+.hitTitle a {
+  text-decoration: none;
+}
+.hitTitle a:hover {
+  text-decoration: underline;
+}
+.hitSummary {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+.hit mark {
+  background: var(--mark);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.hitMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--faint);
+}
+.hitMeta a {
+  color: var(--muted);
+}
+.hitTax {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.why {
+  margin-top: 10px;
+  font-size: 13px;
+}
+.why summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.why dl {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+}
+.score {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+.score dt {
+  color: var(--muted);
+}
+.score dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score meter {
+  width: 160px;
+  height: 8px;
+}
+.empty h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+.empty ul {
+  color: var(--muted);
+}
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  font-size: 14px;
+}

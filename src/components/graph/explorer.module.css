@@ -1,0 +1,196 @@
+.explorer {
+  position: relative;
+  height: calc(100dvh - var(--hdr));
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.canvas {
+  position: absolute;
+  inset: 0;
+  /* Centre the graph to the right of the settings panel on wide screens. */
+  left: 300px;
+}
+.error {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  translate: -50% 0;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: var(--shadow);
+}
+.panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  bottom: 16px;
+  width: 268px;
+  overflow-y: auto;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  z-index: 5;
+}
+.section {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.section:last-child {
+  border-bottom: 0;
+}
+.section h2 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.seg {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.seg button {
+  flex: 1;
+  border: 0;
+  background: none;
+  padding: 7px 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--code-bg);
+  color: var(--fg);
+  font-weight: 600;
+}
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--faint);
+}
+.topics {
+  display: grid;
+  gap: 4px;
+}
+.topics label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.topics label span:last-child {
+  margin-left: auto;
+}
+.panelToggle {
+  display: none;
+}
+.banner {
+  position: absolute;
+  top: 16px;
+  left: calc(300px + 16px);
+  right: 64px;
+  margin-inline: auto;
+  width: max-content;
+  max-width: calc(100% - 380px);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 13px;
+  z-index: 4;
+}
+.zoom {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  display: grid;
+  gap: 6px;
+  z-index: 4;
+}
+.zoom button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--raised);
+  cursor: pointer;
+  color: var(--muted);
+}
+.card {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: min(340px, calc(100% - 32px));
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--raised);
+  box-shadow: var(--shadow);
+  z-index: 5;
+}
+.card h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 19px;
+  margin: 6px 0;
+}
+.card p {
+  color: var(--muted);
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--faint);
+}
+.cardActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .canvas {
+    left: 0;
+  }
+  .panelToggle {
+    display: inline-flex;
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    z-index: 6;
+  }
+  .panel {
+    display: none;
+    top: 60px;
+    right: 16px;
+    width: auto;
+  }
+  .panel[data-open] {
+    display: block;
+  }
+  .banner {
+    left: 16px;
+    right: 16px;
+    top: 60px;
+    max-width: none;
+    width: auto;
+  }
+}

@@ -1,0 +1,25 @@
+.state {
+  max-width: 520px;
+  margin: 72px auto;
+  padding-inline: var(--gutter);
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+.state h2 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0;
+  text-wrap: balance;
+}
+.state p {
+  margin: 0;
+  color: var(--muted);
+}
+.code {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--faint) !important;
+}

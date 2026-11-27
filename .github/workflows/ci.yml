@@ -1,0 +1,62 @@
+# Wave 0 CI (T-W0-07): lint, typecheck, unit tests, API drift check, build.
+# The backend repo is checked out next to this one so `pnpm api:check` can compare against its spec.
+# E2E (Playwright) needs a running backend with content; it runs against Vercel previews once the
+# staging backend exists (release plan W0 exit criteria) — see the commented job below.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Placeholder values so env validation passes during build; no real secrets in CI.
+      APP_ENV: test
+      NEXT_PUBLIC_APP_ENV: test
+      API_BASE_URL: http://127.0.0.1:9
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_WEBHOOK_BASE_URL: http://localhost:8080
+      AUTH_MODE: dev
+      NEXT_PUBLIC_AUTH_MODE: dev
+      DEV_AUTH_SECRET: ci-only-dev-secret-not-used-anywhere-0001
+      DEV_AUTH_ADMIN_CREDENTIALS: admin:admin
+      REVALIDATE_SECRET: ci-only-revalidate-secret-not-used-0001
+      NEXT_PUBLIC_RELEASE: ${{ github.sha }}
+      API_SPEC_PATH: ../knowledge-graph-be/apim/api-spec.yaml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: 21sriharsha/knowledge-graph-be
+          ref: release/dev/v1.0.0
+          path: backend
+          sparse-checkout: apim
+      - name: Place backend spec next to the frontend
+        run: mkdir -p ../knowledge-graph-be && cp -r backend/apim ../knowledge-graph-be/
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm api:check
+      - run: pnpm build
+
+  # e2e:
+  #   needs: check
+  #   runs-on: ubuntu-latest
+  #   steps: checkout, install, `pnpm exec playwright install --with-deps chromium`,
+  #          `E2E_BASE_URL=<vercel preview url> pnpm test:e2e`
