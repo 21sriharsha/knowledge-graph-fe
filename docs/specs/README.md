@@ -32,7 +32,7 @@ Backend changes these specs depend on are collected in [`../backend-gaps.md`](..
 (IDs `BG-n`).
 
 ## Conventions
-- **Personas:** `anon` (signed out), `pending` (signed in, no roles), `author` (AUTHOR, linked byline),
+- **Personas:** `anon` (signed out), `pending` (signed in, no roles — rare since ADR 0008), `author` (AUTHOR, linked byline),
   `admin` (ADMIN, optionally also AUTHOR). These match the prototype's DEV persona switch.
 - **Ownership:** an author may act only on resources owned by their linked byline; admins on anything.
   The backend answers **404** (not 403) for resources the caller does not own.

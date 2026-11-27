@@ -24,6 +24,8 @@ AUTHOR zone. Authors manage repositories owned by their byline; admins manage al
   - project (≤200) shown and required only for Azure DevOps;
   - optional: default branch (≤200), content path (≤500), API base URL (≤500, must be `https://`;
     shown for GitLab/Azure self-hosted), access token (≤500), webhook secret (≤500), owner author
+    (admins only; authors instead see "Articles from this repository are published under your name",
+    linking to Profile — ADR 0008, `source-byline-note`),
     name (≤200) and email (≤320, email format).
 - F08-FR-3 Edit (`PUT /api/studio/sources/{id}`, `UpdateSourceRequest`): display name (required),
   branch, content path, API base URL, owner author (select, admins only), access token, webhook secret.

@@ -1,18 +1,20 @@
 # F01 — Authentication and access
 
-Status: draft · Wave: W4 · ADR: 0003 · Prototype: `#signin`, account menu, pending screen
+Status: draft · Wave: W4 · ADR: 0003, 0008 · Prototype: `#signin`, account menu, pending screen
 
 ## Summary
 Sign in with Supabase Auth (GitHub, Google, email magic link). The backend creates an account on first
-authenticated call and assigns roles only through admins or `BOOTSTRAP_ADMIN_EMAILS`. The frontend
+authenticated call. Every signed-in user is an author by default: Supabase adds AUTHOR to each token,
+and the backend gives the account its own byline (ADR 0008). ADMIN comes only from admins or
+`BOOTSTRAP_ADMIN_EMAILS`. Reading needs no sign-in. The frontend
 adapts navigation and studio access to the roles returned by `GET /api/studio/me`.
 
 ## Personas and access
 | Persona | `/api/studio/me` | Sees |
 |---|---|---|
 | anon | not called | "Sign in" button; `/studio/**` redirects to `/signin?next=` |
-| pending | `roles: []` | Account menu; studio shows "waiting for access" |
-| author | `roles: [AUTHOR]`, `authorId` set | Studio: own articles, repositories, runs; own profile |
+| pending | `roles: []` (only if the Supabase hook is off or the user is excluded) | Account menu; studio shows "no author access yet" |
+| author (default for every signed-in user) | `roles: [AUTHOR]`, `authorId` set | Studio: own articles, repositories, runs; own profile |
 | admin | `roles` include `ADMIN` | Everything, including Accounts |
 
 ## User stories
@@ -21,7 +23,8 @@ adapts navigation and studio access to the roles returned by `GET /api/studio/me
 - As an author, after sign-in I land where I was going (e.g. a studio deep link).
 
 ## Functional requirements
-- F01-FR-1 `/signin` offers GitHub, Google and email magic link; shows which provider is in progress
+- F01-FR-1 `/signin` offers GitHub, Google and email magic link (provider buttons show the provider's
+  mark: GitHub in currentColor, Google's four-colour G); shows which provider is in progress
   and errors from the provider (cancelled, expired link) with a retry.
 - F01-FR-2 PKCE flow via `@supabase/ssr`; `/auth/callback` exchanges the code, sets httpOnly cookies,
   then redirects to the stored `next` path. `next` must be a same-origin relative path (open-redirect
@@ -31,7 +34,7 @@ adapts navigation and studio access to the roles returned by `GET /api/studio/me
 - F01-FR-4 After sign-in, the server loads `/api/studio/me` once per request (cached per request) and
   exposes `{ account, roles, authorId }` to layouts.
 - F01-FR-5 Navigation: account menu with display name/email, "Studio" (if AUTHOR or ADMIN), "Sign out".
-- F01-FR-6 Pending screen (`roles: []`): explains access must be granted by an admin, shows the email
+- F01-FR-6 Pending screen (`roles: []`): explains author access is automatic and suggests signing in again, shows the email
   the admin should look for, a "Check again" button (re-fetches `/me`) and sign-out.
 - F01-FR-7 Admin-only routes (`/studio/accounts`) render 403 page for non-admins (backend still
   enforces with 403).
@@ -61,7 +64,9 @@ adapts navigation and studio access to the roles returned by `GET /api/studio/me
 - F01-AC-1 Given anon opens `/studio/articles`, then they are redirected to `/signin?next=/studio/articles`,
   and after GitHub sign-in land on `/studio/articles`.
 - F01-AC-2 Given `next=https://evil.example`, then after sign-in the user lands on `/`.
-- F01-AC-3 Given a first-time user (`roles: []`), when opening `/studio`, then the pending screen shows
+- F01-AC-7 Given a first-time user whose token carries AUTHOR (ADR 0008), when opening `/studio`, then the studio opens
+  with their own byline and the Profile entry.
+- F01-AC-3 Given a user whose roles are empty (`roles: []`), when opening `/studio`, then the pending screen shows
   with their email and "Check again".
 - F01-AC-4 Given an author, when opening `/studio/accounts`, then a 403 page shows; the account menu has
   no Accounts entry.

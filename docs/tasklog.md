@@ -173,6 +173,102 @@ IDs: `T-00xx` = pre-wave work, `T-W<n>-xx` = wave tasks.
   free, so it falls back to the left.
 - **Verified:** Unit tests 7/7 for placement.
 
+### T-0016 · 2026-11-27 · in-progress · Local Supabase sign-in (F01, BG-17)
+- **Task:** Owner asked to set up OIDC sign-in with their Supabase project.
+- **Done:**
+  - `.env.local` set to `AUTH_MODE=supabase` with the project URL and publishable key. The env
+    files that get committed are unchanged.
+  - Backend started with `OIDC_ISSUER_URI`, `OIDC_AUDIENCE=authenticated` and
+    `BOOTSTRAP_ADMIN_EMAILS` as environment variables, so none of the owner's modified YAML is
+    touched.
+- **Verified:**
+  - Issuer discovery matches the configured issuer.
+  - JWKS publishes an ES256 key (asymmetric, as ADR 0003 requires).
+  - The backend logs "OIDC token authentication enabled". A malformed bearer token gets 401;
+    HTTP Basic still gets 200.
+  - `/signin` renders the Supabase options.
+- **Open:**
+  - Only the email provider is enabled; GitHub and Google must be enabled in the Supabase
+    dashboard.
+  - The redirect URL `http://localhost:3000/auth/callback` must be on the allow list.
+  - The JWKS key id differs from the id the owner supplied. If that id is the legacy HS256 key
+    and it is current, tokens will fail verification; the first real sign-in will show this.
+  - BG-17 closes once `/api/studio/me` succeeds with a real token.
+
+### T-0017 · 2026-11-27 · done · Self-serve authoring: every signed-in user can publish (ADR 0008)
+- **Task:** Owner overrode the "admin approval before authoring" rule from backend commit `328a2da`.
+  Any signed-in user can publish; reading stays public.
+- **Owner decisions:**
+  - AUTHOR comes from a Supabase token claim, so existing accounts inherit it on re-login.
+  - The token can't grant ADMIN.
+  - Moderation is a Supabase ban.
+  - The byline is the user's profile name; front matter doesn't decide it for their repositories.
+- **Backend** (branch `feature/v2.0.0-self-serve-authoring`, spec `.claude/specs/self-serve-authoring.md`):
+  - Effective roles combine stored roles with the `app_roles` claim, limited to AUTHOR. Startup fails
+    if ADMIN is configured as token-grantable.
+  - A personal byline is created on first use, safe under concurrent requests.
+  - Owned repositories attribute every article to the owner.
+  - `/me` returns effective roles.
+  - A profile rename rebuilds that author's article read models; this also fixes a pre-existing gap
+    where profile edits refreshed nothing.
+  - The Supabase hook SQL is in `docs/supabase/`.
+- **Frontend:**
+  - Owner-author fields on the repository form are admin-only; authors see a note pointing to
+    Profile.
+  - The pending screen copy is updated.
+  - ADR 0008 written; F01/F08/F10, CLAUDE.md, BG-24 updated.
+- **Rejected:**
+  - Granting AUTHOR in the backend DB at first sign-in: the owner wants Supabase to own the default.
+  - Token-granted ADMIN.
+  - Front matter deciding bylines (impersonation).
+- **Verified:**
+  - Backend clean build: 326 tests, 0 failures, 74 skipped (Docker). 22 of the tests are new.
+  - Live: resync left bylines unchanged; anonymous reads return 200; a rename showed on the article
+    page at once (2 read models rebuilt), then was restored.
+- **Open:** AC-1/AC-6 with a real token need the owner to run the hook SQL and enable the hook in
+  Supabase, then sign in again.
+### T-0018 · 2026-11-27 · done · Reading-mode toggle restored to the header (X02-FR-5)
+- **Reported:** In light theme the reading-mode toggle seemed to be missing.
+- **Cause:** My deviation, made in W1 and never documented. The prototype puts the toggle in the site
+  header, next to the theme toggle. I had put it in the article's byline action row instead.
+  Behaviour was correct (light only, article pages only); the placement wasn't.
+- **Fix:**
+  - `ReadingToggle` moved into `Header` before `ThemeToggle`. It checks the route itself
+    (`/articles/{slug}`).
+  - The floating "Exit reading mode" button is now a separate `ExitReading`, rendered by the article
+    page. The header's `backdrop-filter` makes it the containing block for `position: fixed`, which
+    had pinned the button over "Sign in".
+  - X02-FR-5 now states the placement.
+- **Verified:**
+  - `pnpm check` passes. X02 E2E: 3/3.
+  - Chromium:
+    - Toggle is in the header, directly before the theme toggle, in both light cases (system light;
+      system dark with a light override).
+    - Hidden in dark theme and on `/`, `/articles` and topic pages.
+    - The exit button sits at the bottom right and turns reading mode off.
+### T-0019 · 2026-11-27 · done · Reading toggle on every light page; provider logos on sign-in (amends T-0018)
+- **Reported:** No reading-mode icon in the header on a non-article page. Separately: add Google and
+  GitHub icons to the sign-in page.
+- **Cause:** I had written X02-FR-5 as "only on article pages", which narrowed the prototype. The
+  prototype hides the toggle only outside light theme, applies the paper palette site-wide, and
+  limits only the chrome hiding to articles. My CSS also limited the palette to articles.
+- **Fix:**
+  - The header toggle renders on every page in light theme.
+  - The palette is site-wide. Larger type, hidden chrome and the floating exit control stay
+    article-only.
+  - X02-FR-5 is corrected, and X02-AC-5 is new, with an E2E test.
+- **Sign-in:** `ProviderLogo` (inline SVG, aria-hidden; no dependency) on "Continue with
+  GitHub/Google":
+  - GitHub uses the Octicons mark (MIT) in currentColor.
+  - Google uses its four-colour G.
+  - F01-FR-1 is updated.
+- **Verified:**
+  - `pnpm check` passes. X02 E2E: 4/4.
+  - Screenshots:
+    - Sign-in in light and dark: both logos render and the buttons keep their text names.
+    - Home in light theme with reading on: toggle pressed, paper background `rgb(244,239,229)`, nav
+      visible.
+
 ---
 
 ## Wave 0 — Foundations (in progress)

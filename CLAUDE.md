@@ -29,8 +29,9 @@ is specific to this repo.
 - **BFF only:** browser code calls Next.js route handlers / server actions, never the Spring API.
 - **Data ownership:** server components own server-fetched data; TanStack Query owns browser-fetched
   data. Do not cache the same data in both.
-- **Roles never come from the token.** The UI reads roles from `GET /api/studio/me`; hiding a control
-  is UX only — the backend enforces access.
+- **The UI never reads roles from the token.** It reads *effective* roles from `GET /api/studio/me`;
+  hiding a control is UX only — the backend enforces access. (The backend itself may take AUTHOR,
+  never ADMIN, from a Supabase-written claim — ADR 0008.)
 - **No HTML injection.** Article bodies are rendered from typed content blocks; no
   `dangerouslySetInnerHTML` for content.
 - **Telemetry:** feature code imports only `@/lib/telemetry` and `@opentelemetry/api`. Vendor SDKs

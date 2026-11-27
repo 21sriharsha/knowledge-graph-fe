@@ -10,11 +10,15 @@ export function PendingAccess({ email }: { email?: string }) {
   const [pending, start] = useTransition();
   return (
     <section className={styles.state} data-testid="pending-access">
-      <h2>Waiting for access</h2>
-      <p>Your account exists, but an admin needs to grant you author access before you can use the studio.</p>
+      <h2>No author access yet</h2>
+      <p>
+        Every signed-in account gets author access automatically. If you just signed in, sign out and back in to refresh
+        it.
+      </p>
       {email && (
         <p>
-          Ask an admin to look for <strong>{email}</strong> under Accounts.
+          If it still doesn&apos;t appear, your account may have been restricted — an admin can look for <strong>{email}</strong>{" "}
+          under Accounts.
         </p>
       )}
       <div style={{ display: "flex", gap: 8 }}>

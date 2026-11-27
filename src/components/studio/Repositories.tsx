@@ -179,7 +179,7 @@ export function Repositories() {
         title={drawer?.mode === "edit" ? `Edit ${drawer.source.displayName}` : "Connect repository"}
         dirty={dirty}
       >
-        {drawer?.mode === "create" && <CreateForm onDone={closeDrawer} onDirty={setDirty} />}
+        {drawer?.mode === "create" && <CreateForm admin={account.admin} onDone={closeDrawer} onDirty={setDirty} />}
         {drawer?.mode === "edit" && (
           <EditForm source={drawer.source} authors={account.admin ? (authors.data?.content ?? []) : null} onDone={closeDrawer} onDirty={setDirty} />
         )}
@@ -195,7 +195,7 @@ function useDirty(values: Record<string, string>, onDirty: (dirty: boolean) => v
   useEffect(() => onDirty(dirty), [dirty, onDirty]);
 }
 
-function CreateForm({ onDone, onDirty }: { onDone: () => void; onDirty: (dirty: boolean) => void }) {
+function CreateForm({ admin, onDone, onDirty }: { admin: boolean; onDone: () => void; onDirty: (dirty: boolean) => void }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [values, setValues] = useState<Record<string, string>>({ sourceType: "GITHUB", defaultBranch: "main", contentPath: "docs" });
@@ -281,10 +281,19 @@ function CreateForm({ onDone, onDirty }: { onDone: () => void; onDirty: (dirty: 
       )}
       <TextField name="accessToken" label="Access token" type="password" maxLength={500} value={values.accessToken ?? ""} onChange={set("accessToken")} error={errors.accessToken} hint="Write-only. Needed for private repositories." />
       <TextField name="webhookSecret" label="Webhook secret" type="password" maxLength={500} value={values.webhookSecret ?? ""} onChange={set("webhookSecret")} error={errors.webhookSecret} hint="Write-only. Without it, pushes won't trigger syncs." />
-      <div className={styles.grid2}>
-        <TextField name="ownerAuthorName" label="Owner author name" maxLength={200} value={values.ownerAuthorName ?? ""} onChange={set("ownerAuthorName")} error={errors.ownerAuthorName} hint="Byline for articles without an author field." />
-        <TextField name="ownerAuthorEmail" label="Owner author email" type="email" maxLength={320} value={values.ownerAuthorEmail ?? ""} onChange={set("ownerAuthorEmail")} error={errors.ownerAuthorEmail} />
-      </div>
+      {/* Self-serve authoring: a non-admin's repository is always owned by their own byline, so the
+          backend ignores owner fields from them. Only admins choose an owner (or none). */}
+      {admin ? (
+        <div className={styles.grid2}>
+          <TextField name="ownerAuthorName" label="Owner author name" maxLength={200} value={values.ownerAuthorName ?? ""} onChange={set("ownerAuthorName")} error={errors.ownerAuthorName} hint="With an owner, every article is published under them. Leave empty for a multi-author repository: each article's front-matter author is used." />
+          <TextField name="ownerAuthorEmail" label="Owner author email" type="email" maxLength={320} value={values.ownerAuthorEmail ?? ""} onChange={set("ownerAuthorEmail")} error={errors.ownerAuthorEmail} />
+        </div>
+      ) : (
+        <p className="faint" data-testid="source-byline-note">
+          Articles from this repository are published under your name. You can change it on your{" "}
+          <Link href="/studio/profile">profile</Link>.
+        </p>
+      )}
       <button type="submit" className="btn" data-variant="primary" disabled={create.isPending} data-testid="source-save">
         {create.isPending ? "Connecting…" : "Connect"}
       </button>

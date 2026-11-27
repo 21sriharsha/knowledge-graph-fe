@@ -12,6 +12,7 @@ Alternatives considered. Status is `accepted`, `superseded by NNNN` or `proposed
 | [0005](0005-config-selected-telemetry-adapter.md) | Config-selected telemetry adapter | accepted | 2026-11-26 |
 | [0006](0006-hosting-vercel-supabase-fly.md) | Hosting on Vercel, Supabase and Fly.io | accepted | 2026-11-26 |
 | [0007](0007-api-types-generated-from-spec.md) | API types generated from the OpenAPI spec | accepted | 2026-11-26 |
+| [0008](0008-self-serve-authoring.md) | Self-serve authoring: every signed-in user can publish | accepted | 2026-11-27 |
 
 New decisions: copy any record, take the next number, add a row here, and log the task in
 `../tasklog.md`.

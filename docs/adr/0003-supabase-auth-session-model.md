@@ -1,6 +1,6 @@
 # 0003 — Supabase Auth and the session model
 
-Status: accepted · 2026-11-26
+Status: accepted · 2026-11-26 · role rules superseded by [0008](0008-self-serve-authoring.md) (2026-11-27)
 
 ## Context
 The backend validates OIDC JWTs against a JWKS (`OIDC_ISSUER_URI`, `OIDC_JWK_SET_URI`, optional

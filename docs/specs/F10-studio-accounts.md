@@ -3,7 +3,10 @@
 Status: draft · Wave: W5 · Prototype: `#studio` (Accounts tab, admin only)
 
 ## Summary
-Admins grant and revoke roles and link accounts to author bylines. This is how a pending user becomes
+Since ADR 0008, every signed-in user is an author through their token. This page shows and edits
+*stored* grants (ADMIN, and AUTHOR for accounts without the token claim). It does not show
+token-granted AUTHOR, and revoking AUTHOR here doesn't stop it: ban the user in Supabase instead.
+Admins grant and revoke roles and link accounts to author bylines. Before ADR 0008, this was how a pending user became
 an author.
 
 ## Personas and access
